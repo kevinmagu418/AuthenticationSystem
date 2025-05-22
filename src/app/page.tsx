@@ -27,12 +27,12 @@ export default function HomePage() {
         <Link href="/login">
           <Button
             variant="contained"
-            sx={{ backgroundColor: "white", color: "var(--mpesa-green)", fontWeight: "bold"}}
+            sx={{ backgroundColor: "white", color: "var(--mpesa-green)", fontWeight: "bold",marginright:"4px"}}
           >
             Login
           </Button>
         </Link>
-        <Link href="/signup">
+        <Link href="/signupform">
           <Button
             variant="outlined"
             sx={{

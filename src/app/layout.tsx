@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
-import dbConnect from "../../lib/connectdb";
+
 import Providers from "@/components/providers";
 
 const roboto = Roboto({
@@ -21,19 +21,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await dbConnect(); //will connect once on ssr
+  
 
   return (
     <html lang="en">
-      <body
-        className={`${roboto.variable} antialiased`}
+      <body suppressHydrationWarning={true} className={`${roboto.variable} antialiased`}
       >
-
         {/*setting up sessionprovider in ur app */}
      <main><Providers>{children}</Providers> </main>
-
-
-      
       </body>
     </html>
   );

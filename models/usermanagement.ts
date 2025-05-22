@@ -9,8 +9,9 @@ export interface Credential {
 //typescript interface
 export interface IUser extends Document {
   username: string;
+  password:string;
   email: string;
-  createdAt: Date;
+  isPhoneVerified?:string;
   credentials?:Credential[];//optional passkey credentials
 }
 
@@ -31,9 +32,14 @@ const userSchema = new Schema<IUser>(
   {
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
-    createdAt: { type: Date, default: Date.now },
+      password: {
+    type: String,
+    required: true,
+  },
+  isPhoneVerified:{type:Boolean,required:false,default:false},
     credentials: { type: [credentialSchema], default: undefined }, // Optional
 
+  
   },
   { timestamps: true }
 );
