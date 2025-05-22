@@ -13,7 +13,7 @@ export interface IUser extends Document {
   email: string;
   isPhoneVerified?:string;
  resetToken?:string;
- resetTokenExpiry:Date;
+ resetTokenExpiry?:Date;
   credentials?:Credential[];//optional passkey credentials
 }
 
@@ -38,7 +38,7 @@ const userSchema = new Schema<IUser>(
     type: String,
     required: true,
   },
-   resetTokenExpiry:{typ:Date,required:false},
+   resetTokenExpiry:{type:Date,required:false},
   resetToken:{type:String,required:false},
   isPhoneVerified:{type:Boolean,required:false,default:false},
     credentials: { type: [credentialSchema], default: undefined }, // Optional

@@ -1,33 +1,50 @@
+
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { InputField } from '@/components/form/InputField';
-//import { useRouter } from 'next/navigation';
 
-export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+export default function ResetPasswordPage() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+  const email = searchParams.get('email');
+
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  //const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setMessage('');
 
+    if (!email || !token) {
+      setMessage('Missing reset token or email');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setMessage('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, token, newPassword }),
       });
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.message || 'Something went wrong');
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
 
-      setMessage('Check your email for a reset link');
-      setEmail('');
+      setMessage('Password reset successfully. You can now log in.');
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (error) {
       if (error instanceof Error) {
         setMessage(error.message);
@@ -42,26 +59,34 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
       <div className="w-full max-w-md space-y-6">
-        <h1 className="text-2xl font-semibold text-center">Forgot Password</h1>
+        <h1 className="text-2xl font-semibold text-center">Reset Password</h1>
         <p className="text-sm text-white-500 text-center">
-          Enter your email and we’ll send you a password reset link.
+          Enter your new password below.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputField
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="password"
+            placeholder="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="w-full bg-black border border-gray-600 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mpesa-green)]"
+          />
+
+          <InputField
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full bg-black border border-gray-600 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--mpesa-green)]"
           />
 
           <div className="flex justify-center">
             <button
               className="px-6 py-2 bg-[var(--light-green)] text-black rounded font-medium hover:opacity-90 transition disabled:opacity-50"
-              disabled={loading || !email}
+              disabled={loading || !newPassword || !confirmPassword}
             >
-              {loading ? 'Sending...' : 'Send Reset Link'}
+              {loading ? 'Resetting...' : 'Reset Password'}
             </button>
           </div>
         </form>
@@ -73,11 +98,14 @@ export default function ForgotPasswordPage() {
         )}
 
         <p className="text-sm text-center text-gray-500">
-          Remember your password?{' '}
+          Back to{' '}
           <a href="/login" className="text-[var(--light-green)] underline font-extrabold text-xl">
             Sign in
           </a>
         </p>
+
+
+
       </div>
     </div>
   );

@@ -126,11 +126,12 @@ export default function LoginPage() {
         </form>
 
         <p className="text-sm text-center text-gray-500">
-          Don’t have an account?{' '}
-          <Link href="/register" className="text-[var(--light-green)] underline font-bold">
-            Sign up
-          </Link>
-        </p>
+  Forgot your password?{' '}
+  <Link href="/forgotpassword" className="text-[var(--light-green)] underline font-bold">
+    Reset it
+  </Link>
+</p>
+
 
         <p className="text-xs text-center text-gray-600">
           This site is protected by hCaptcha. Its{' '}
