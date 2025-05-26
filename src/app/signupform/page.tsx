@@ -204,9 +204,9 @@ router.push('/phone-number'); // <-- Add this line
         </p>
         <p className="text-sm text-center text-gray-500">
           Already have an account?{' '}
-          <a href="#" className="text-[var(--light-green)] underline font-extrabold text-xl">
+          <Link href="/login" className="text-[var(--light-green)] underline font-extrabold text-xl">
             Sign in
-          </a>
+          </Link>
         </p>
 
         {/* Footer */}

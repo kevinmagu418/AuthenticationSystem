@@ -23,7 +23,7 @@ if (typeof decoded === 'string' || !('email' in decoded)) {
 }
 
 const emailFromToken = (decoded as JwtPayload).email;
-const user= await User.findOne({emai:emailFromToken});
+const user= await User.findOne({email:emailFromToken});
 if (user.resetToken !== token) {
   return NextResponse.json({ error: 'Token mismatch or already used' }, { status: 401 });
 }

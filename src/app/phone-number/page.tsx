@@ -36,6 +36,8 @@ export default function PhoneNumberForm() {
 
     if (res.ok) {
       console.log("OTP sent successfully");
+
+        localStorage.setItem("userPhoneNumber", countryCode + phone);
       router.push('/confirmOtp');
       // Optional: Redirect or show success toast
     } else {

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,10 @@ export default function OtpVerificationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
- const router=useRouter();
+  const router = useRouter();
+
+
+
   // Initialize refs array
   useEffect(() => {
     inputRefs.current = inputRefs.current.slice(0, 6);
@@ -20,6 +23,72 @@ export default function OtpVerificationForm() {
     inputRefs.current[0]?.focus();
   }, []);
 
+  const handleSubmit = useCallback(async () => {
+    const otpString = otp.join("");
+    console.log(otpString);
+    if (otpString.length !== 6) {
+      setError("Please enter a correct digit code");
+      return;
+    }
+ const userPhoneNumber = localStorage.getItem("userPhoneNumber");
+  if (!userPhoneNumber) {
+    setError("Phone number not found. Please restart verification.");
+    router.push("/phone-number");
+    return;
+  }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ otpCode: otpString,phoneNumber:userPhoneNumber }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "OTP verification failed");
+      }
+
+      toast.success("OTP verified successfully!", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+      router.push("/dashboard");
+      localStorage.removeItem("userPhoneNumber");
+
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Verification failed";
+      setError(message);
+      toast.error(message, {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      setOtp(new Array(6).fill(""));
+      inputRefs.current[0]?.focus();
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [otp, router]);
+
+  useEffect(() => {
+    if (otp.every((digit) => digit !== "")) {
+      handleSubmit();
+    }
+  }, [otp, handleSubmit]);
+
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
 
@@ -28,10 +97,6 @@ export default function OtpVerificationForm() {
     setOtp(newOtp);
     setError("");
 
-    if (value && index === 5 ){
-      handleSubmit();
-    }
-    
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -49,7 +114,7 @@ export default function OtpVerificationForm() {
     if (/^\d+$/.test(pasteData)) {
       const newOtp = [...otp];
       for (let i = 0; i < pasteData.length; i++) {
-        if (i < 5) {
+        if (i < 6) {
           newOtp[i] = pasteData[i];
         }
       }
@@ -59,60 +124,6 @@ export default function OtpVerificationForm() {
       } else {
         inputRefs.current[pasteData.length]?.focus();
       }
-    }
-  };
-
-  const handleSubmit = async () => {
-    const otpString = otp.join("");
-    console.log(otpString);
-    if (otpString.length !== 6) {
-      setError("Please enter a correct digit code");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      //  API call
-    const res = await fetch("/api/auth/verify-otp", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ otpCode: otpString }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || "OTP verification failed");
-    }
-
-    toast.success("OTP verified successfully!", {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    }); 
-
-    router.push('/dashboard');
-      }
-     catch (err) {
-      const message = err instanceof Error ? err.message : "Verification failed";
-      setError(message);
-      toast.error(message, {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      setOtp(new Array(6).fill(""));
-      inputRefs.current[0]?.focus();
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -153,7 +164,7 @@ export default function OtpVerificationForm() {
         )}
 
         <div className="text-center text-sm text-gray-600">
-          Didnot receive code?{" "}
+          Didn’t receive the code?{" "}
           <button
             type="button"
             className="text-green-600 font-medium hover:underline focus:outline-none"
